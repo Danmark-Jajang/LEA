@@ -71,8 +71,8 @@ void LEA_Encryption(UNIT *pText, UNIT *cText, UNIT *RoundKey){
 
 void Enc_Round(UNIT *Out, UNIT *In, UNIT *RK){
     Out[0] = ROL(9, ((In[0]^RK[0]) + (In[1]^RK[1])));
-    Out[1] = ROL(5, ((In[1]^RK[2]) + (In[2]^RK[3])));
-    Out[2] = ROL(3, ((In[2]^RK[4]) + (In[3]^RK[5])));
+    Out[1] = ROR(5, ((In[1]^RK[2]) + (In[2]^RK[3])));
+    Out[2] = ROR(3, ((In[2]^RK[4]) + (In[3]^RK[5])));
     Out[3] = In[0];
 }
 
@@ -86,7 +86,7 @@ void LEA_Decryption(UNIT *cText, UNIT *dcText, UNIT *RoundKey){
     }
 
     for(r=0;r<Nr;r++){
-        Dec_Round(XOUT, XIN, RoundKey+((Nr-r-1)*6));
+        Dec_Round(XOUT, XIN, (RoundKey+((Nr-r-1)*6)));
         for(i=0;i<4;i++){
             XIN[i] = XOUT[i];
         }
@@ -100,22 +100,22 @@ void LEA_Decryption(UNIT *cText, UNIT *dcText, UNIT *RoundKey){
 void Dec_Round(UNIT *Out, UNIT *In, UNIT *RK){
     Out[0] = In[3];
     Out[1] = ((ROR(9, In[0])) - (Out[0]^RK[0]))^RK[1];
-    Out[2] = ((ROR(5, In[1])) - (Out[1]^RK[2]))^RK[3];
-    Out[3] = ((ROR(3, In[2])) - (Out[2]^RK[4]))^RK[5];
+    Out[2] = ((ROL(5, In[1])) - (Out[1]^RK[2]))^RK[3];
+    Out[3] = ((ROL(3, In[2])) - (Out[2]^RK[4]))^RK[5];
 }
 
 void main(){
     int i;
     UNIT KeyRound[6 * Nr] = {0,};
-    UNIT pText[4] = {0x13579BDF, 0x02468ACE, 0xC0FFEE0, 0xAE472BE6}; //Plain Text
+    UNIT pText[4] = {0x12345678, 0x9ABCDEF0, 0x23456789, 0xABCDEF01}; //Plain Text
     UNIT cText[4] = {0,}; //Cipher Text
     UNIT dcText[4] = {0,}; //DeCipher Text
 
     BYTE Key[16] = {
-        0x01, 0x23, 0x45, 0x67,
-        0x89, 0xAB, 0xCD, 0xEF,
-        0x13, 0x57, 0x9B, 0xEF,
-        0x02, 0x46, 0x8A, 0xCE
+        0x04, 0x26, 0xAB, 0xCD,
+        0xA4, 0x27, 0xFB, 0xED,
+        0x04, 0x76, 0xAB, 0xBD,
+        0x04, 0x36, 0xAB, 0x3D
     };
 
     //Key Generater
